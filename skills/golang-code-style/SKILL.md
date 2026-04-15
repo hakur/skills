@@ -28,6 +28,7 @@ description: Go 代码生成规范与验证技能。当生成或修改 Go 代码
 | 定义枚举/常量 | `references/enums.md` |
 | 使用锁/并发 | `references/concurrency.md` |
 | 组织文件目录 | `references/file-organization.md` |
+| 模块分包规范 | `references/module-organization.md` |
 | 全局配置/实例 | `references/global-instances.md` |
 | 使用日志 | `references/logging.md` |
 | 设计代码架构 | `references/code-philosophy.md` |
