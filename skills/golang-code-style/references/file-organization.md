@@ -28,7 +28,7 @@ model/
 └── openai_stream_chat_model.go # OpenAIStreamChatModel 实现
 ```
 
-## 目录结构模式
+## fiber框架目录结构模式
 
 ```
 project/

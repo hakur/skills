@@ -45,13 +45,22 @@ python <this skill dir>/scripts/verify.py <project_path>
 | 层级 | 检查内容 | 工具 |
 |------|---------|------|
 | L1 | `go vet` + `golangci-lint` | `scripts/checks/l1_static.py` |
-| L2 | 禁止项和命名规则扫描 | `scripts/checks/l2_standards.py` |
+| L2 | 代码重复检测 + AST 规则检查 | `scripts/checks/l2_dupl.py` + `scripts/checks/l2_ruleguard.py` |
 | L3 | `go build` + `go test` | `scripts/checks/l3_compile.py` |
 
-L2 检查项：
+L2 检查项包含两个独立的检查模块：
+
+**A. 代码重复检测（dupl）**
+- 检测 15 行以上的重复代码块
+- 2 处重复 = WARN，3 处及以上 = ERROR
+- 自动排除 vendor/ 和生成的文件
+
+**B. AST 规则检查（ruleguard）**
+
+基于 AST 的精确检查（避免正则误报）：
 
 **ERROR（必须修复）：**
-- 禁止使用 `sync.Mutex` / `sync.RWMutex`
+- 禁止使用 `sync.Mutex` / `sync.RWMutex`（AST 精确匹配）
 - 禁止创建日志库新实例（`logrus.New()` / `zap.New()` 等）
 - 禁止在测试中使用 `t.Run` 嵌套
 - 禁止使用 `t.Skip`
@@ -62,6 +71,10 @@ L2 检查项：
 **WARN（建议修复）：**
 - 接口命名建议以 `I` 开头
 - receiver 变量名建议使用小写 `t`
+
+**配置文件**：
+- ruleguard 规则：`references/ruleguard/rules.go`
+- dupl 阈值：通过 `DUPL_THRESHOLD` 环境变量设置（默认 15）
 
 ### 第三步：语义性自检（AI 检查清单）
 

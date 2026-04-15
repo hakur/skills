@@ -37,6 +37,8 @@
 | WebSocket | `github.com/coder/websocket` | 禁止 gorilla/websocket |
 | 消息队列 | `nats` / `nats-jetstream` | 优先选择 |
 | 代码检查 | `go vet` | 每次修改后必跑 |
+| 代码重复检测 | `github.com/mibk/dupl` | 检测重复代码块，保持 DRY 原则 |
+| AST 规则检查 | `github.com/quasilyte/go-ruleguard/dsl` | 通过 golangci-lint 集成，精确检查 |
 
 ## 二、框架选择（二选一）
 
@@ -79,4 +81,48 @@
 性能敏感且有 CGO 环境 → sonic
 普通场景 → encoding/json（标准库）
 只需要查询某个字段 → gjson
+```
+
+## 五、代码检查工具
+
+| 工具 | 用途 | 集成方式 |
+|------|------|---------|
+| `dupl` | 检测代码重复 | `go install github.com/mibk/dupl@latest` |
+| `ruleguard` | AST 级别规则检查 | 通过 golangci-lint 启用 |
+| `golangci-lint` | Linter 聚合器 | 已包含 ruleguard 插件 |
+
+### 安装代码检查工具
+
+```bash
+# 安装 dupl（代码重复检测）
+go install github.com/mibk/dupl@latest
+
+# ruleguard 通过 golangci-lint 使用，无需单独安装
+# 确保 golangci-lint 版本 >= 1.55.0 以支持 ruleguard
+```
+
+### dupl 使用示例
+
+```bash
+# 检测重复代码（默认阈值 15 行）
+dupl -t 15 ./...
+
+# 设置阈值
+export DUPL_THRESHOLD=10
+```
+
+### ruleguard 规则位置
+
+规则文件位于：`references/ruleguard/rules.go`
+
+通过 golangci-lint 配置启用：
+```yaml
+# .golangci.yml
+linters:
+  enable:
+    - ruleguard
+
+linters-settings:
+  ruleguard:
+    rules: "path/to/rules.go"
 ```

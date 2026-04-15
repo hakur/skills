@@ -52,7 +52,8 @@ def main():
 
     levels = [
         ("L1", "l1_static.py", "Static Analysis (go vet + golangci-lint)"),
-        ("L2", "l2_standards.py", "Standards Compliance (regex checks)"),
+        ("L2-dupl", "l2_dupl.py", "Code Duplication Detection"),
+        ("L2-guard", "l2_ruleguard.py", "AST Rules Check (ruleguard)"),
         ("L3", "l3_compile.py", "Compile & Test Verification"),
     ]
 

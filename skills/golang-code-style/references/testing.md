@@ -68,6 +68,95 @@ func TestCalculator(t *testing.T) {
 }
 ```
 
+## 代码重复检测
+
+### DRY 原则（Don't Repeat Yourself）
+
+测试代码同样需要遵循 DRY 原则。重复的测试代码会导致：
+- 维护困难：一处改动需要修改多处
+- 可读性差：测试意图被重复代码淹没
+- 容易遗漏：复制粘贴时可能漏改关键部分
+
+### 代码重复检测配置
+
+L2 层代码检查包含 `dupl` 工具检测代码重复：
+
+```bash
+# 设置重复阈值（默认 15 行）
+export DUPL_THRESHOLD=10
+
+# 运行检查
+python <skill-dir>/scripts/verify.py <project-path>
+```
+
+### 严重程度分级
+
+| 重复次数 | 严重程度 | 处理要求 |
+|---------|---------|---------|
+| 2 处 | WARN | 建议提取公共函数或 setup 方法 |
+| 3+ 处 | ERROR | 必须重构，提取公共辅助函数 |
+
+### 常见重复场景
+
+**❌ 重复的场景：多处测试使用相同的初始化逻辑**
+
+```go
+func TestCreateUser(t *testing.T) {
+    db := setupTestDB()
+    defer teardownTestDB(db)
+    user := &User{Name: "test"}
+    err := db.Create(user).Error
+    assert.NoError(t, err)
+}
+
+func TestUpdateUser(t *testing.T) {
+    db := setupTestDB()  // 重复！
+    defer teardownTestDB(db)  // 重复！
+    user := &User{Name: "test"}
+    err := db.Create(user).Error  // 重复！
+    assert.NoError(t, err)  // 重复！
+}
+```
+
+**✅ 好的示范：使用 TestMain 和辅助函数**
+
+```go
+var testDB *gorm.DB
+
+func TestMain(m *testing.M) {
+    testDB = setupTestDB()
+    defer teardownTestDB(testDB)
+    code := m.Run()
+    os.Exit(code)
+}
+
+func createTestUser(t *testing.T, name string) *User {
+    user := &User{Name: name}
+    err := testDB.Create(user).Error
+    assert.NoError(t, err)
+    return user
+}
+
+func TestCreateUser(t *testing.T) {
+    user := createTestUser(t, "test")
+    assert.NotZero(t, user.ID)
+}
+
+func TestUpdateUser(t *testing.T) {
+    user := createTestUser(t, "test")
+    user.Name = "updated"
+    err := testDB.Save(user).Error
+    assert.NoError(t, err)
+}
+```
+
+### 允许合理重复的情况
+
+以下情况不算违规：
+- 测试数据准备（不同测试需要不同数据）
+- 断言组合（合理的 assert 组合）
+- 简单的 3-5 行重复（低于阈值）
+
 ## 内存数据库使用
 
 ### MySQL 内存测试（结合 gorm）
