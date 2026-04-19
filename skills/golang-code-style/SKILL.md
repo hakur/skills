@@ -31,6 +31,7 @@ description: Go 代码生成规范与验证技能。当生成或修改 Go 代码
 | 模块分包规范 | `references/module-organization.md` |
 | 全局配置/实例 | `references/global-instances.md` |
 | 使用日志 | `references/logging.md` |
+| 命名规范（变量/包冲突等） | `references/naming.md` |
 | 设计代码架构 | `references/code-philosophy.md` |
 
 ### 第二步：脚本验证（机械性检查）

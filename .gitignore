@@ -2,3 +2,6 @@
 openspec
 __pycache__
 /test-golang-style
+node_modules
+package.json
+package-lock.json

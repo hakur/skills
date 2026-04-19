@@ -30,6 +30,7 @@
 | 数据迁移 | `github.com/golang-migrate/migrate` | 数据库迁移，备选 `github.com/pressly/goose` |
 | 深度拷贝 | `github.com/jinzhu/copier` | DTO ↔ Entity 数据拷贝 |
 | 图像处理 | `github.com/disintegration/imaging` | 缩放/裁剪/水印 |
+| S3 / 兼容 S3 协议存储 | `github.com/aws/aws-sdk-go-v2/service/s3` | 连接 AWS S3、MinIO、Cloudflare R2 等各类兼容 S3 协议的存储服务 |
 | 定时任务 | `github.com/robfig/cron/v3` | 定时任务调度 |
 | 监控指标 | `github.com/prometheus/client_golang` | Prometheus 指标 |
 | 遥测 | `go.opentelemetry.io/otel` + contrib + build-tools | 分布式追踪 |
@@ -39,6 +40,28 @@
 | 代码检查 | `go vet` | 每次修改后必跑 |
 | 代码重复检测 | `github.com/mibk/dupl` | 检测重复代码块，保持 DRY 原则 |
 | AST 规则检查 | `github.com/quasilyte/go-ruleguard/dsl` | 通过 golangci-lint 集成，精确检查 |
+
+### S3 使用规范
+
+使用 `github.com/aws/aws-sdk-go-v2/service/s3` 时：
+
+- **默认禁用 Path Style**：连接 MinIO、R2 等兼容 S3 协议的服务时，优先使用虚拟主机样式（virtual-hosted-style）访问。仅当目标服务明确不支持虚拟主机样式时，才启用 `UsePathStyle`。
+- **Endpoint 配置**：通过 `EndpointResolverV2` 或 `BaseEndpoint` 指定自定义端点，不要手动拼接 URL。
+
+```go
+// ✅ 正确：使用虚拟主机样式（默认行为）
+cfg, _ := config.LoadDefaultConfig(context.TODO())
+client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+    o.BaseEndpoint = aws.String("https://minio.example.com")
+    // 不设置 UsePathStyle，保持默认（虚拟主机样式）
+})
+
+// ❌ 错误：默认就启用 Path Style
+client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+    o.BaseEndpoint = aws.String("https://minio.example.com")
+    o.UsePathStyle = true  // 仅在明确需要时才启用
+})
+```
 
 ## 二、框架选择（二选一）
 
