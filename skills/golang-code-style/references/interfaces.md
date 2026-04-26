@@ -108,8 +108,8 @@ type UserGetter interface {
     GetUserByEmail(ctx context.Context, email string) (*User, error)
 }
 
-// ❌ 不需要 I 前缀（Go 社区惯例）
-// type IUserRepository interface {}  // 不推荐
+// ✅ Go 社区惯例：接口名描述能力，不使用 I 前缀
+// type IUserRepository interface {}  // 仅在命名冲突时使用
 ```
 
 ### 仅用于解决命名冲突时使用 I 前缀

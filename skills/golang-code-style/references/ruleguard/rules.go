@@ -124,16 +124,15 @@ func forbidGorillaWebsocket(m dsl.Matcher) {
 // 命名规范规则（WARN 级别）
 // ============================================================================
 
-// warnInterfaceNaming 建议接口命名规范
+// warnInterfaceNaming 建议接口命名规范（Go 社区惯例：能力描述命名）
 func warnInterfaceNaming(m dsl.Matcher) {
-	// 检查导出的接口是否以 I 开头或以 er 结尾
+	// 建议接口名以 er 结尾（Go 惯例，如 Reader/Writer）或使用能力描述
 	m.Match(`type $name interface { ... }`).
 		Where(
 			m["name"].Text.Matches(`^[A-Z]`) && // 是导出接口
-				!m["name"].Text.Matches(`^I[A-Z]`) && // 不以 I 开头
 				!m["name"].Text.Matches(`.*er$`), // 不以 er 结尾
 		).
-		Report("接口命名建议以 I 开头（如 IReader）或以 er 结尾（如 Reader）")
+		Report("接口命名建议以 er 结尾（Go 惯例，如 Reader/Writer）或使用能力描述命名")
 }
 
 // warnMeaninglessInterfaceName 警告无意义的接口命名
