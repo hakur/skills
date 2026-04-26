@@ -174,6 +174,67 @@ python <skill-dir>/scripts/verify.py <project_path>
 | L2 | 代码重复检测（dupl）+ AST 规则检查（ruleguard） | `scripts/checks/l2_dupl.py` + `scripts/checks/l2_ruleguard.py` |
 | L3 | `go build` + `go test` | `scripts/checks/l3_compile.py` |
 
+## 🔧 未知库学习协议 — 遇到不熟悉的 Go 三方库时执行
+
+当需要使用一个**不在 LLM 训练数据中**或**不熟悉**的 Go 三方库时，按以下三层策略执行。此协议是**指令**，不是建议。
+
+### Step 1: go doc — 主力工具，理解 API 意图
+
+先查阅文档（prose），不要直接读源码。文档信息密度远高于源码，更高效。
+
+```bash
+# 查看包的完整 API 文档
+go doc <pkg>
+# 示例: go doc github.com/samber/lo
+
+# 查看特定类型的文档
+go doc <pkg>.<Type>
+# 示例: go doc github.com/samber/lo.Map
+
+# 查看特定方法的文档
+go doc <pkg>.<Type>.<Method>
+# 示例: go doc net/http.ResponseWriter.Write
+```
+
+**Token 成本**: ~100-300 tokens 即可获取完整 API 概况。
+**适用**: 所有情况。这是第一步，必做。
+
+### Step 2: lsp_find_references — 辅助工具，找真实使用示例
+
+如果看了文档仍不确定具体写法，搜索项目中已有的调用：
+
+```
+lsp_find_references(filePath="your/file.go", line=N, character=N)
+→ 返回项目中所有使用该符号的位置 → 阅读其中 1-2 个实际写法学到模式
+```
+
+**Token 成本**: ~200-500 tokens（含跳转阅读）。
+**适用**: 文档不够清晰时。按需使用，不是必做。
+
+### Step 3: lsp_diagnostics — 验证工具，检查类型正确性
+
+写完代码后，不等 `go build`，立即验证：
+
+```
+lsp_diagnostics(filePath="your/file.go")
+→ 即时返回类型错误、未定义符号等
+→ 根据错误修正代码 → 重新验证 → 直到干净
+```
+
+**Token 成本**: ~50-100 tokens。
+**适用**: 写完使用新库的代码后必做。
+
+### Token 效率原则
+
+```
+go doc (文档)          → 总是先做，信息密度最高
+lsp_find_references   → 按需，文档不够时
+lsp_diagnostics       → 写完代码后总是做
+LSP 直接读源码         → 最后手段，token 最昂贵
+```
+
+---
+
 ## 📚 深入参考（按需查阅）
 
 核心规则已在上方完整展示。以下文件提供详细示例和解释：
@@ -198,5 +259,4 @@ python <skill-dir>/scripts/verify.py <project_path>
 - **ruleguard 规则**: `references/ruleguard/rules.go` — 基于 AST 精确检查，通过 golangci-lint 集成
 - **dupl 阈值**: 通过 `DUPL_THRESHOLD` 环境变量设置（默认 15）
 - **语义自检**: 脚本只检查机械性规则。接口必要性、设计模式适度性等语义规则已在上方约束层中覆盖
-- **go doc**: 每次使用 Go 第三方库之前，使用 `go doc` 命令查阅 import 路径内 package 的 API 文档
 - **protobuf**: 每次修改 protobuf 文件后都要运行命令行重新生成代码
