@@ -85,23 +85,6 @@ func forbidLogrusRegister(m dsl.Matcher) {
 // 测试相关规则
 // ============================================================================
 
-// forbidNestedTestRun 禁止在测试中使用 t.Run 嵌套
-func forbidNestedTestRun(m dsl.Matcher) {
-	// 匹配在外层 t.Run 回调中再次调用 t.Run
-	m.Match(`
-		func $Test($t *testing.T) {
-			$t.Run($_, func($_ *testing.T) {
-				$*_
-				$t.Run($_, func($_ *testing.T) {
-					$*_
-				})
-				$*_
-			})
-		}
-	`).
-		Report("禁止在测试中使用 t.Run 嵌套，请使用扁平化的测试函数")
-}
-
 // forbidTSkip 禁止在测试中使用 t.Skip
 func forbidTSkip(m dsl.Matcher) {
 	m.Match(`$t.Skip($*_)`, `$t.Skipf($*_)`, `$t.SkipNow()`).

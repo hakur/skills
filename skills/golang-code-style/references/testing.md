@@ -15,7 +15,6 @@
 
 ### 必须遵守
 
-- **禁止嵌套测试**：不要使用 `t.Run` 嵌套，一层套一层很不好看
 - **禁止 t.Skip**：不要因为条件不满足就跳过测试，缺少条件应人工补充
 - **禁止集成测试文件**：不生成 `xxx_integration_test.go`
 - **禁止根目录 test 目录**：不生成 `test/` 或 `test/integration/`
@@ -54,18 +53,6 @@ func TestTrieTreeInsert(t *testing.T) {
 }
 
 func TestTrieTreeDelete(t *testing.T) {}
-```
-
-## 坏的示范
-
-```go
-// ❌ t.Run 嵌套测试
-func TestCalculator(t *testing.T) {
-    t.Run("Advanced", func(t *testing.T) {
-        t.Run("Multiplication", func(t *testing.T) {})
-        t.Run("Division", func(t *testing.T) {})
-    })
-}
 ```
 
 ## 代码重复检测
